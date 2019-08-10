@@ -1,0 +1,5 @@
+force=True
+species=haha/species.tree
+gene=haha/tree/AtpC/AtpC.bootstrap.trees
+output=haha/angst/0-0-0-0/res/AtpC
+penalties=haha/angst/0-0-0-0/penalty.txt

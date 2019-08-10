@@ -1,0 +1,6 @@
+# run angst
+bash wrapperAngst.sh #usage
+
+# summarize gains/losses
+ruby mapGainLoss.rb -s results/species.tree --indir results/angst/3-2-1-0/res/ --style bootstrap --countType gene --rela results/species.rela --tip_size --fam COG3705 #example
+

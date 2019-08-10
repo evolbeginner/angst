@@ -1,0 +1,1 @@
+/home-user/sswang/tools/self_bao_cun/packages/bash/check_which.sh

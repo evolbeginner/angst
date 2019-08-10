@@ -1,0 +1,34 @@
+
+# angst version info #
+angst v
+
+# input data #
+species file:	haha-2/species.tree
+species count:	30
+bootstrap file:	haha-2/tree/Ate1/Ate1.bootstrap.trees
+gene count:	26
+bootstraps:	20
+possible hgt:	2158
+
+# model settings #
+event guide:	None
+hgt penalty: 2.0
+dup penalty: 3.0
+los penalty: 3.0
+spc penalty: 0.0
+
+# inference counts #
+hgt inferred: 10
+dup inferred: 0
+los inferred: 0
+spc inferred: 15
+
+# running time #
+run-time: 10.6568021774 sec
+
+# memory usage #
+55.383	55.383	init
+55.516	0.133	build species tree
+62.391	6.875	build bootstraps
+88.594	26.203	rebuild gene tree
+89.109	0.516	last reconciliation

@@ -1,0 +1,4 @@
+hgt: 2
+dup: 3
+los: 1
+spc: 0
