@@ -69,8 +69,7 @@ def getSortedTaxa(tips, is_space=true, is_remove_front_num=true, is_remove_end_n
   if is_remove_end_num
     tips.map{|i|i.name.sub!(/_\d+$/,''); i.name}
   end
-  #tips.sort_by!{|i|i.name}.map!{|i|i.name}
-  tips.sort_by{|i|i.name}.map{|i|i.name}
+  tips.sort_by!{|i|i.name}.map!{|i|i.name}
   return(tips)
 end
 
@@ -86,6 +85,7 @@ def getLines(infile)
     is_reading_fam = false if line =~ /^\t\tTotal Ancestral Size/
     next unless is_reading_fam
     lines << line
+    #break if lines.size >= 100
   end
   in_fh.close
   return(lines)
@@ -177,19 +177,32 @@ results = Parallel.map(lines, in_processes:cpu) do |line|
   fam2taxa = Hash.new
   fam2tips = Hash.new
   fam, tree_str = line.split("\t")[2,2]
+  fam = fam.to_sym #convert to sym
   next unless fams_included.include?(fam) unless fams_included.empty?
   tree = Bio::Newick.new(tree_str).tree
-  tree.nodes.each do |node|
+  tree.each_node do |node|
     # note that the last "_10" will be removed from each tip name
     taxa = $is_angst ? getSortedTaxa(tree.tips(node), true, true, false) : getSortedTaxa(tree.tips(node))
     taxa2fam[taxa]=Hash.new if not taxa2fam.include? taxa
     fam2taxa[fam]=Hash.new if not fam2taxa.include? fam
-    if node.name !~ /^\d+\|/
-      taxa2fam[taxa][fam] = taxa.size > 1 ? node.bootstrap : node.name.split(' ')[-1].to_i
-      fam2taxa[fam][taxa] = taxa.size > 1 ? node.bootstrap : node.name.split(' ')[-1].to_i
+    if node.name =~ /^\d+\|/
+      if taxa.size > 1
+        taxa2fam[taxa][fam] = node.bootstrap
+        fam2taxa[fam][taxa] = node.bootstrap
+      else
+        num_opt = node.name.split('|')[0].to_i
+        taxa2fam[taxa][fam] = num_opt
+        fam2taxa[fam][taxa] = num_opt
+      end
     else
-      taxa2fam[taxa][fam] = taxa.size > 1 ? node.bootstrap : node.name.split('|')[0].to_i
-      fam2taxa[fam][taxa] = taxa.size > 1 ? node.bootstrap : node.name.split('|')[0].to_i
+      if taxa.size > 1
+        taxa2fam[taxa][fam] = node.bootstrap
+        fam2taxa[fam][taxa] = node.bootstrap
+      else
+        num_opt = node.name.split(' ')[-1].to_i
+        taxa2fam[taxa][fam] = num_opt
+        fam2taxa[fam][taxa] = num_opt
+      end
     end
     fam2tips[fam] = [] unless fam2tips.include?(fam)
     tree.tips(node).each do |node|
@@ -245,7 +258,11 @@ Parallel.map(taxa_includeds, in_processes: taxa_includeds.size) do |taxa_include
   out_fh2 = File.open(outfile2, 'w')
 
   fam2taxa.each_pair do |fam, v|
-    out_fh1.puts [fam, taxa_included.map{|i|v[i]}, taxa_included.map{|i|v[i]}.reduce(:-)].join("\t")
+    begin
+      out_fh1.puts [fam, taxa_included.map{|i|v[i]}, taxa_included.map{|i|v[i]}.reduce(:-)].join("\t")
+    rescue
+      puts fam
+    end
   end
 
   fam2tips.each_pair do |fam, tips|
